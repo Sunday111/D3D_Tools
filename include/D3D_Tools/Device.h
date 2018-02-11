@@ -4,8 +4,8 @@
 #include "EverydayTools\Exception\CallAndRethrow.h"
 #include "WinWrappers\ComPtr.h"
 #include "WinWrappers\WinWrappers.h"
-
 #include "Texture.h"
+#include "Shader.h"
 
 namespace d3d_tools {
     class Device {
@@ -98,6 +98,54 @@ namespace d3d_tools {
                 pDSV = dsv->GetView();
             }
             m_deviceContext->OMSetRenderTargets(1, &pRTV, pDSV);
+        }
+
+        void SetViewports(edt::DenseArrayView<const D3D11_VIEWPORT> viewports) {
+            m_deviceContext->RSSetViewports(
+                static_cast<UINT>(viewports.GetSize()),
+                viewports.GetData());
+        }
+
+        void Draw(unsigned vertexCount, unsigned startvert = 0) {
+            m_deviceContext->Draw(vertexCount, startvert);
+        }
+
+        void SetInputLayout(ID3D11InputLayout* layout) {
+            m_deviceContext->IASetInputLayout(layout);
+        }
+
+        void SetVertexBuffer(ID3D11Buffer* buffer, unsigned stride, unsigned offset) {
+            m_deviceContext->IASetVertexBuffers(0, 1, &buffer, &stride, &offset);
+        }
+
+        void SetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY topo) {
+            m_deviceContext->IASetPrimitiveTopology(topo);
+        }
+
+        ComPtr<ID3D11InputLayout> CreateInputLayout(const D3D11_INPUT_ELEMENT_DESC* elementDescriptor, unsigned elementsCount, ID3D10Blob* shader) {
+            return CallAndRethrowM + [&] {
+                ComPtr<ID3D11InputLayout> result;
+                WinAPI<char>::ThrowIfError(
+                    m_device->CreateInputLayout(
+                        elementDescriptor, elementsCount,
+                        shader->GetBufferPointer(), shader->GetBufferSize(),
+                        result.Receive()));
+                return result;
+            };
+        }
+
+        ComPtr<ID3D11Buffer> CreateBuffer(D3D11_BUFFER_DESC desc, void* initialData = nullptr) {
+            ComPtr<ID3D11Buffer> buffer;
+            D3D11_SUBRESOURCE_DATA subresourceData;
+            const D3D11_SUBRESOURCE_DATA* pSubresourceData = nullptr;
+            if (initialData) {
+                subresourceData.pSysMem = initialData;
+                subresourceData.SysMemPitch = 0;
+                subresourceData.SysMemSlicePitch = 0;
+                pSubresourceData = &subresourceData;
+            }
+            WinAPI<char>::ThrowIfError(m_device->CreateBuffer(&desc, pSubresourceData, buffer.Receive()));
+            return buffer;
         }
 
     private:

@@ -24,6 +24,12 @@ namespace d3d_tools {
                 WinAPI<char>::ThrowIfError(factory->CreateSwapChain(device, &scd, m_swapchain.Receive()));
             };
         }
+
+        ~SwapChain() {
+            if (m_swapchain.Get()) {
+                m_swapchain->SetFullscreenState(false, nullptr);
+            }
+        }
     
         void* GetNativeInterface() const {
             return m_swapchain.Get();
@@ -41,6 +47,10 @@ namespace d3d_tools {
                 backBuffer->AddRef();
                 return Texture(std::move(backBuffer));
             };
+        }
+
+        void Present(unsigned interval = 0, unsigned flags = 0) {
+            m_swapchain->Present(interval, flags);
         }
     
     private:
