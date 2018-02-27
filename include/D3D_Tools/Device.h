@@ -1,6 +1,7 @@
 #pragma once
 
 #include "d3d11.h"
+#include "d3d11_1.h"
 #include "EverydayTools\Exception\CallAndRethrow.h"
 #include "WinWrappers\ComPtr.h"
 #include "WinWrappers\WinWrappers.h"
@@ -120,6 +121,16 @@ namespace d3d_tools {
 
         void SetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY topo) {
             m_deviceContext->IASetPrimitiveTopology(topo);
+        }
+
+        ComPtr<ID3DUserDefinedAnnotation> CreateAnnotation() const {
+            return CallAndRethrowM + [&] {
+                ComPtr<ID3DUserDefinedAnnotation> annotation;
+                WinAPI<char>::ThrowIfError(m_deviceContext->QueryInterface(
+                    __uuidof(ID3DUserDefinedAnnotation),
+                    reinterpret_cast<void**>(annotation.Receive())));
+                return annotation;
+            };
         }
 
         ComPtr<ID3D11InputLayout> CreateInputLayout(const D3D11_INPUT_ELEMENT_DESC* elementDescriptor, unsigned elementsCount, ID3D10Blob* shader) {
