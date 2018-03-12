@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5.1)
 set(module_name D3D_Tools)
-set(D3D_Tools true CACHE BOOL "Wrappers for DirectX calls")
+set(${module_name} true CACHE BOOL "Wrappers for DirectX calls")
 if(NOT ${D3D_Tools})
     return()
 endif()
