@@ -2,6 +2,7 @@
 
 #include "d3d11.h"
 #include "d3d11_1.h"
+#include "EverydayTools\Array\ArrayView.h"
 #include "EverydayTools\Exception\CallAndRethrow.h"
 #include "WinWrappers\ComPtr.h"
 #include "WinWrappers\WinWrappers.h"
