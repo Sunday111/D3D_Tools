@@ -145,7 +145,7 @@ namespace d3d_tools {
             };
         }
 
-        ComPtr<ID3D11Buffer> CreateBuffer(D3D11_BUFFER_DESC desc, void* initialData = nullptr) {
+        ComPtr<ID3D11Buffer> CreateBuffer(D3D11_BUFFER_DESC desc, const void* initialData = nullptr) {
             ComPtr<ID3D11Buffer> buffer;
             D3D11_SUBRESOURCE_DATA subresourceData;
             const D3D11_SUBRESOURCE_DATA* pSubresourceData = nullptr;
