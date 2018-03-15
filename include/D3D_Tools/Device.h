@@ -116,6 +116,66 @@ namespace d3d_tools {
             m_deviceContext->IASetInputLayout(layout);
         }
 
+		void SetShaderResource(uint32_t slot, ShaderType shaderType, ID3D11ShaderResourceView* view) {
+			using Method = void (ID3D11DeviceContext::*)(UINT, UINT, ID3D11ShaderResourceView* const *);
+			Method method = nullptr;
+
+			switch (shaderType)
+			{
+			case d3d_tools::ShaderType::Compute:
+				method = &ID3D11DeviceContext::CSSetShaderResources;
+				break;
+			case d3d_tools::ShaderType::Domain:
+				method = &ID3D11DeviceContext::DSSetShaderResources;
+				break;
+			case d3d_tools::ShaderType::Geometry:
+				method = &ID3D11DeviceContext::GSSetShaderResources;
+				break;
+			case d3d_tools::ShaderType::Hull:
+				method = &ID3D11DeviceContext::HSSetShaderResources;
+				break;
+			case d3d_tools::ShaderType::Pixel:
+				method = &ID3D11DeviceContext::PSSetShaderResources;
+				break;
+			case d3d_tools::ShaderType::Vertex:
+				method = &ID3D11DeviceContext::VSSetShaderResources;
+				break;
+			}
+
+			edt::ThrowIfFailed(method != nullptr, "Not implemented for this shader type");
+			(*m_deviceContext.*method)(0, 1, &view);
+		}
+
+		void SetSampler(uint32_t slot, ID3D11SamplerState* sampler, ShaderType shaderType) {
+			using Method = void (ID3D11DeviceContext::*)(UINT, UINT, ID3D11SamplerState* const *);
+			Method method = nullptr;
+
+			switch (shaderType)
+			{
+			case d3d_tools::ShaderType::Compute:
+				method = &ID3D11DeviceContext::CSSetSamplers;
+				break;
+			case d3d_tools::ShaderType::Domain:
+				method = &ID3D11DeviceContext::DSSetSamplers;
+				break;
+			case d3d_tools::ShaderType::Geometry:
+				method = &ID3D11DeviceContext::GSSetSamplers;
+				break;
+			case d3d_tools::ShaderType::Hull:
+				method = &ID3D11DeviceContext::HSSetSamplers;
+				break;
+			case d3d_tools::ShaderType::Pixel:
+				method = &ID3D11DeviceContext::PSSetSamplers;
+				break;
+			case d3d_tools::ShaderType::Vertex:
+				method = &ID3D11DeviceContext::VSSetSamplers;
+				break;
+			}
+
+			edt::ThrowIfFailed(method != nullptr, "Not implemented for this shader type");
+			(*m_deviceContext.*method)(0, 1, &sampler);
+		}
+
         void SetVertexBuffer(ID3D11Buffer* buffer, unsigned stride, unsigned offset) {
             m_deviceContext->IASetVertexBuffers(0, 1, &buffer, &stride, &offset);
         }

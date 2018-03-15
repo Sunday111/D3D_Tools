@@ -265,6 +265,11 @@ namespace d3d_tools {
                 return d;
             };
         }
+
+		static size_t ComputeBytesPerPixel(TextureFormat) {
+			// ???
+			return 4;
+		}
     
         Texture(ID3D11Device* device, uint32_t w, uint32_t h, TextureFormat format, TextureFlags flags, void* initialData = nullptr) :
             m_format(format)
@@ -275,6 +280,7 @@ namespace d3d_tools {
                 if (initialData) {
                     D3D11_SUBRESOURCE_DATA subresource{};
                     subresource.pSysMem = initialData;
+					subresource.SysMemPitch = static_cast<UINT>(w * ComputeBytesPerPixel(format));
                     hres = device->CreateTexture2D(&desc, &subresource, m_texture.Receive());
                 } else {
                     hres = device->CreateTexture2D(&desc, nullptr, m_texture.Receive());
