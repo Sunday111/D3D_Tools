@@ -21,13 +21,13 @@ namespace d3d_tools {
         ComPtr<ID3DUserDefinedAnnotation> m_p;
     };
 
-    ScopedAnnotation CreateScopedAnnotation(Device* device, const wchar_t* title) {
+    inline ScopedAnnotation CreateScopedAnnotation(Device* device, const wchar_t* title) {
         return ScopedAnnotation(device->CreateAnnotation(), title);
     }
 
 
     template<typename F>
-    decltype(auto) Annotate(Device* device, const wchar_t* title, F&& f) {
+	inline decltype(auto) Annotate(Device* device, const wchar_t* title, F&& f) {
         ScopedAnnotation annotation(device->CreateAnnotation(), title);
         return static_cast<decltype(f.operator()())>(f());
     }
