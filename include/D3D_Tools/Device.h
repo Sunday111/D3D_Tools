@@ -52,10 +52,10 @@ namespace d3d_tools {
         }
 
         template<ShaderType shaderType>
-        decltype(auto) CreateShader(const char* code, const char* entryPoint, ShaderVersion shaderVersion) {
+        decltype(auto) CreateShader(const char* code, const char* entryPoint, ShaderVersion shaderVersion, edt::SparseArrayView<const ShaderMacro> definitions) {
             return CallAndRethrowM + [&] {
                 Shader<shaderType> result;
-                result.Compile(code, entryPoint, shaderVersion);
+                result.Compile(code, entryPoint, shaderVersion, definitions);
                 result.Create(m_device.Get());
                 return result;
             };

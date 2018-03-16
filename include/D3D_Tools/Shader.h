@@ -3,6 +3,7 @@
 #include "d3d11.h"
 #include "d3dcompiler.h"
 #include "EverydayTools\Exception\CallAndRethrow.h"
+#include "EverydayTools\Array\ArrayView.h"
 #include "WinWrappers\ComPtr.h"
 #include "WinWrappers\WinWrappers.h"
 
@@ -21,6 +22,11 @@ namespace d3d_tools {
         _4_1,
         _4_0,
     };
+
+	struct ShaderMacro {
+		std::string_view name;
+		std::string_view value;
+	};
 
     namespace shader_details {
     
@@ -150,10 +156,10 @@ namespace d3d_tools {
         };
     }
 
-    inline ComPtr<ID3DBlob> CompileShaderToBlob(const char* code, const char* entryPoint, ShaderType shaderType, ShaderVersion shaderVersion) {
+    inline ComPtr<ID3DBlob> CompileShaderToBlob(const char* code, const char* entryPoint, ShaderType shaderType, ShaderVersion shaderVersion,
+		edt::SparseArrayView<const ShaderMacro> definitionsView = edt::SparseArrayView<const ShaderMacro>()) {
         return CallAndRethrowM + [&] {
             auto datasize = std::char_traits<char>::length(code);
-            D3D_SHADER_MACRO macro[] = { nullptr, nullptr };
             auto shaderTarget = ShaderTypeToShaderTarget(shaderType, shaderVersion);
             ComPtr<ID3DBlob> shaderBlob;
             ComPtr<ID3DBlob> errorBlob;
@@ -177,12 +183,26 @@ namespace d3d_tools {
                 | D3DCOMPILE_ALL_RESOURCES_BOUND
             #endif;
                 ;
+
+			std::vector<D3D_SHADER_MACRO> definitions;
+			D3D_SHADER_MACRO nullDefinition {};
+			const D3D_SHADER_MACRO* definitionsPtr = &nullDefinition;
+
+			auto definitionsCount = definitionsView.GetSize();
+			if (definitionsCount > 0) {
+				definitions.reserve(definitionsCount + 1);
+				for (auto& definition : definitionsView) {
+					definitions.push_back(D3D_SHADER_MACRO { definition.name.data(), definition.value.data()});
+				}
+				definitions.push_back(nullDefinition);
+				definitionsPtr = definitions.data();
+			}
     
             WinAPI<char>::HandleError(D3DCompile(
                 code,
                 datasize,
                 nullptr,              // May be used for debugging
-                macro,                // Null-terminated array of macro definitions
+				definitionsPtr,       // Null-terminated array of macro definitions
                 nullptr,              // Includes
                 entryPoint,           // Main function of shader
                 shaderTarget,         // shader target
@@ -202,9 +222,10 @@ namespace d3d_tools {
         using Traits = shader_details::ShaderTraits<shaderType>;
         using Interface = typename Traits::Interface;
     
-        void Compile(const char* code, const char* entryPoint, ShaderVersion shaderVersion) {
+        void Compile(const char* code, const char* entryPoint, ShaderVersion shaderVersion, edt::SparseArrayView<const ShaderMacro> definitions =
+			edt::SparseArrayView<const ShaderMacro>()) {
             CallAndRethrowM + [&] {
-                bytecode = CompileShaderToBlob(code, entryPoint, shaderType, shaderVersion);
+                bytecode = CompileShaderToBlob(code, entryPoint, shaderType, shaderVersion, definitions);
             };
         }
     
