@@ -194,14 +194,45 @@ namespace d3d_tools {
             };
         }
 
-        ComPtr<ID3D11InputLayout> CreateInputLayout(const D3D11_INPUT_ELEMENT_DESC* elementDescriptor, unsigned elementsCount, ID3D10Blob* shader) {
+        ComPtr<ID3D11InputLayout> CreateInputLayout(edt::DenseArrayView<const D3D11_INPUT_ELEMENT_DESC> descriptors, ID3D10Blob* shader) {
+            return CreateInputLayout(descriptors.GetData(), static_cast<uint32_t>(descriptors.GetSize()), shader);
+        }
+        
+        ComPtr<ID3D11InputLayout> CreateInputLayout(const D3D11_INPUT_ELEMENT_DESC* elementDescriptor, uint32_t elementsCount, ID3D10Blob* shader) {
             return CallAndRethrowM + [&] {
                 ComPtr<ID3D11InputLayout> result;
-                WinAPI<char>::ThrowIfError(
+                auto onCreationError = [&](std::string&& briefErrorMessage) {
+                    // Try to get adddition information about shader input layout
+                    // to simplify debugging those annoying unclear errors
+
+                    std::string reflectionExtraInfo;
+                    auto onReflectError = [&reflectionExtraInfo](std::string&& briefErrorMessage) {
+                        reflectionExtraInfo = "Failed to reflect shader: " + briefErrorMessage;
+                    };
+
+                    ComPtr<ID3D11ShaderReflection> pShaderReflector;
+                    bool error = WinAPI<char>::HandleError(
+                        D3DReflect(shader->GetBufferPointer(), shader->GetBufferSize(),
+                            __uuidof(ID3D11ShaderReflection), (void**)pShaderReflector.Receive()),
+                        onReflectError);
+
+                    if (!error) {
+                        // TODO:
+                    }
+
+                    throw std::runtime_error(
+                        std::string("Failed to create input layout: ") +
+                        briefErrorMessage + '\n' +
+                        "Shader reflection information: \n" +
+                        reflectionExtraInfo
+                    );
+                };
+                WinAPI<char>::HandleError(
                     m_device->CreateInputLayout(
                         elementDescriptor, elementsCount,
                         shader->GetBufferPointer(), shader->GetBufferSize(),
-                        result.Receive()));
+                        result.Receive()),
+                    onCreationError);
                 return result;
             };
         }
