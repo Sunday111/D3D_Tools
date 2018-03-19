@@ -143,7 +143,7 @@ namespace d3d_tools {
 			}
 
 			edt::ThrowIfFailed(method != nullptr, "Not implemented for this shader type");
-			(*m_deviceContext.*method)(0, 1, &view);
+			(*m_deviceContext.*method)(slot, 1, &view);
 		}
 
 		void SetSampler(uint32_t slot, ID3D11SamplerState* sampler, ShaderType shaderType) {
@@ -173,7 +173,7 @@ namespace d3d_tools {
 			}
 
 			edt::ThrowIfFailed(method != nullptr, "Not implemented for this shader type");
-			(*m_deviceContext.*method)(0, 1, &sampler);
+			(*m_deviceContext.*method)(slot, 1, &sampler);
 		}
 
         void SetVertexBuffer(ID3D11Buffer* buffer, unsigned stride, unsigned offset) {
