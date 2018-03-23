@@ -6,6 +6,7 @@
 #include "EverydayTools\Array\ArrayView.h"
 #include "WinWrappers\ComPtr.h"
 #include "WinWrappers\WinWrappers.h"
+#include <vector>
 
 namespace d3d_tools {
     enum class ShaderType {
