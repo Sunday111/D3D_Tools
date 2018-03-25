@@ -48,8 +48,8 @@ namespace d3d_tools {
             return m_device.Get();
         }
 
-        ID3D11DeviceContext* GetContext() const {
-            return m_deviceContext.Get();
+        ComPtr<ID3D11DeviceContext> GetContext() const {
+            return m_deviceContext;
         }
 
         template<ShaderType shaderType>

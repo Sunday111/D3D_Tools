@@ -8,7 +8,7 @@ namespace d3d_tools {
     template<typename Element>
     class BufferMapper {
     public:
-        BufferMapper(ComPtr<ID3D11Buffer> buffer, ID3D11DeviceContext* deviceContext, D3D11_MAP mapType, unsigned mapFlags = 0) :
+        BufferMapper(ComPtr<ID3D11Buffer> buffer, ComPtr<ID3D11DeviceContext> deviceContext, D3D11_MAP mapType, unsigned mapFlags = 0) :
             m_buffer(buffer),
             m_deviceContext(deviceContext)
         {
@@ -47,6 +47,6 @@ namespace d3d_tools {
     private:
         D3D11_MAPPED_SUBRESOURCE m_subresource;
         ComPtr<ID3D11Buffer> m_buffer = nullptr;
-        ID3D11DeviceContext* m_deviceContext = nullptr;
+        ComPtr<ID3D11DeviceContext> m_deviceContext = nullptr;
     };
 }
