@@ -181,6 +181,35 @@ namespace d3d_tools {
             m_deviceContext->IASetVertexBuffers(0, 1, &buffer, &stride, &offset);
         }
 
+        void SetConstantBuffer(ID3D11Buffer* buffer, ShaderType shaderType) {
+            using Method = void (ID3D11DeviceContext::*)(UINT, UINT, ID3D11Buffer* const *);
+            Method method = nullptr;
+
+            switch (shaderType)
+            {
+            case d3d_tools::ShaderType::Compute:
+                method = &ID3D11DeviceContext::CSSetConstantBuffers;
+                break;
+            case d3d_tools::ShaderType::Domain:
+                method = &ID3D11DeviceContext::DSSetConstantBuffers;
+                break;
+            case d3d_tools::ShaderType::Geometry:
+                method = &ID3D11DeviceContext::GSSetConstantBuffers;
+                break;
+            case d3d_tools::ShaderType::Hull:
+                method = &ID3D11DeviceContext::HSSetConstantBuffers;
+                break;
+            case d3d_tools::ShaderType::Pixel:
+                method = &ID3D11DeviceContext::PSSetConstantBuffers;
+                break;
+            case d3d_tools::ShaderType::Vertex:
+                method = &ID3D11DeviceContext::VSSetConstantBuffers;
+                break;
+            }
+            edt::ThrowIfFailed(method != nullptr, "Not implemented for this shader type");
+            (*m_deviceContext.*method)(0, 1, &buffer);
+        }
+
         void SetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY topo) {
             m_deviceContext->IASetPrimitiveTopology(topo);
         }
