@@ -5,7 +5,7 @@
 namespace d3d_tools {
     class SwapChain {
     public:
-        SwapChain(ID3D11Device* device, uint32_t w, uint32_t h, HWND hWnd)
+        SwapChain(ID3D11Device* device, uint32_t w, uint32_t h, HWND hWnd, DXGI_FORMAT format)
         {
             CallAndRethrowM + [&] {
                 ComPtr<IDXGIFactory> factory;
@@ -13,7 +13,7 @@ namespace d3d_tools {
     
                 DXGI_SWAP_CHAIN_DESC scd{};
                 scd.BufferCount = 1;                                    // one back buffer
-                scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;     // use 32-bit color
+                scd.BufferDesc.Format = format;                         // use 32-bit color
                 scd.BufferDesc.Width = w;
                 scd.BufferDesc.Height = h;
                 scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;      // how swap chain is to be used
