@@ -18,7 +18,8 @@ namespace d3d_tools {
         R8_G8_B8_A8_UNORM,
         R24_G8_TYPELESS,
         D24_UNORM_S8_UINT,
-        R24_UNORM_X8_TYPELESS
+        R24_UNORM_X8_TYPELESS,
+        R8_UNORM
     };
     
     enum class TextureFlags {
@@ -38,6 +39,7 @@ namespace d3d_tools {
                 case TextureFormat::R24_G8_TYPELESS: return DXGI_FORMAT_R24G8_TYPELESS;
                 case TextureFormat::D24_UNORM_S8_UINT: return DXGI_FORMAT_D24_UNORM_S8_UINT;
                 case TextureFormat::R24_UNORM_X8_TYPELESS: return DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+                case TextureFormat::R8_UNORM: return DXGI_FORMAT_R8_UNORM;
                 default: throw std::runtime_error("This texture format is not implemented here");
                 }
             };
@@ -50,6 +52,7 @@ namespace d3d_tools {
                 case DXGI_FORMAT_R24G8_TYPELESS: return TextureFormat::R24_G8_TYPELESS;
                 case DXGI_FORMAT_D24_UNORM_S8_UINT: return TextureFormat::D24_UNORM_S8_UINT;
                 case DXGI_FORMAT_R24_UNORM_X8_TYPELESS: return TextureFormat::R24_UNORM_X8_TYPELESS;
+                case DXGI_FORMAT_R8_UNORM: return TextureFormat::R8_UNORM;
                 default: throw std::runtime_error("This texture format is not implemented here");
                 }
             };
@@ -266,10 +269,24 @@ namespace d3d_tools {
             };
         }
 
-		static size_t ComputeBytesPerPixel(TextureFormat) {
-			// ???
-			return 4;
-		}
+        static size_t ComputeBytesPerPixel(TextureFormat format) {
+            return CallAndRethrowM + [&] {
+                switch (format) {
+                case TextureFormat::R8_G8_B8_A8_UNORM:
+                case TextureFormat::R24_G8_TYPELESS:
+                case TextureFormat::D24_UNORM_S8_UINT:
+                case TextureFormat::R24_UNORM_X8_TYPELESS:
+                    return 4;
+                    break;
+
+                case TextureFormat::R8_UNORM:
+                    return 1;
+                    break;
+                }
+
+                throw std::exception("This format is not supported here");
+            };
+        }
     
         Texture(ID3D11Device* device, uint32_t w, uint32_t h, TextureFormat format, TextureFlags flags, void* initialData = nullptr) :
             m_format(format)
